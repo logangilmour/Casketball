@@ -2,14 +2,29 @@
 using System.Collections;
 
 public class Car : MonoBehaviour {
-	float CarAngle = 0f;
 	// Use this for initialization
-	void Start () {
+	Animator animator;
+	static int smoothing = 10;
+	float[] average = new float[smoothing];
 	
+	void Start () {
+		animator = this.GetComponent<Animator>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        this.transform.localRotation = Quaternion.AngleAxis(Input.GetAxis("Horizontal")*(Input.GetButton("Boost")?10f:(Mathf.Lerp(30f,90f,Input.GetAxis("Break")))),Vector3.up);
+		float angle = (Input.GetAxis("Horizontal")*(Input.GetButton("Boost")?0.04f:(Mathf.Lerp(0.1f,0.25f,Input.GetAxis("Break")))));
+		float avg = 0f;
+		
+		for(int i=1; i<smoothing;i++){
+			average[i-1]=average[i];
+			avg+=average[i];
+			
+		}
+		avg+=angle;
+		average[smoothing-1]=angle;
+		avg/=smoothing;
+        animator.SetFloat("Angle",(avg%1+1)%1);
+        
 	}
 }
